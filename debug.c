@@ -39,9 +39,9 @@ void print_ec(char* cmd, pid_t pid, int status)
 {
   if (pid != -1)
   {
-    fprintf(stderr, "%s     [ + Debug Info: Process - %d\n",(status != 0)?ANSI_COLOR_RED:ANSI_COLOR_GREEN, pid);
-    fprintf(stderr, "       +             Command -%s\n", cmd);
-    fprintf(stderr, "       +             exited with status %d ]%s\n\n",status,ANSI_COLOR_RESET);}
+    fprintf(stderr, "%s    [ + Debug Info: Process - %d\n",(status != 0)?ANSI_COLOR_RED:ANSI_COLOR_GREEN, pid);
+    fprintf(stderr, "      +             Command -%s\n", cmd);
+    fprintf(stderr, "      +             exited with status %d ]%s\n\n",status,ANSI_COLOR_RESET);}
   else 
     fprintf(stderr, "%s [ * Debug Info: Command exited with status %d ]%s\n",(status!=0)?ANSI_COLOR_RED:ANSI_COLOR_GREEN, status, ANSI_COLOR_RESET);
 }
