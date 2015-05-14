@@ -20,6 +20,21 @@ get_next_byte(void *stream)
   return getc(stream);
 }
 
+void verbose_helper(command_t command, bool* d)
+{
+  bool f = false;
+  if (!f) f = true;
+  else putchar('\n');
+  print_verbose(command);
+  if (*d)
+    {
+      *d = debugMode();
+      execute_command(command,false);
+    }
+  else
+    execute_command(command,false);
+}
+
 int
 main(int argc, char **argv)
 {
@@ -44,6 +59,12 @@ main(int argc, char **argv)
       case -1: goto options_exhausted;
       }
  options_exhausted:;
+  //some options are exclusive
+  if (time_travel == true && verbose == true)
+    usage();
+  if (doption == true && (verbose == false && xbose == false))
+    usage();
+
 
   // There must be exactly one file argument.
   if (optind != argc - 1)
@@ -71,7 +92,6 @@ main(int argc, char **argv)
   }
   else
     {
-      bool f = false;
       while ((command = read_command_stream(command_stream)))
 	{
 	  if (print_tree)
@@ -82,11 +102,10 @@ main(int argc, char **argv)
 	  else
 	    {
 	      last_command = command;
-	      if (verbose) {
-		if (!f) f = true;
-		else putchar('\n'); 
-		print_verbose(command);
-	      }
+	      if (verbose) 
+		{
+		  verbose_helper(command,&doption);
+		}
 	      execute_command(command, time_travel, xbose, doption);
 	    }
 	}
