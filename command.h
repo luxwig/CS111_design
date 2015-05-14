@@ -61,12 +61,16 @@ command_t read_command_stream(command_stream_t stream);
 void print_command(command_t);
 
 /* Execute a command.  Use "time travel" if the flag is set.  */
-void execute_command(command_t, bool);
+void execute_command(command_t, bool, bool);
 
 /* Return the exit status of a command, which must have previously
 been executed.  Wait for the command, if it is not already finished.  */
 int command_status(command_t);
 
-int executeGraph(depGraph*);
+int executeGraph(depGraph*, bool);
 
 depGraph* createGraph(command_stream_t);
+
+void print_verbose(command_t);
+
+

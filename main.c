@@ -11,7 +11,7 @@ static char const *script_name;
 static void
 usage(void)
 {
-  error(1, 0, "usage: %s [-pt] SCRIPT-FILE", program_name);
+  error(1, 0, "usage: %s [-ptvx] SCRIPT-FILE", program_name);
 }
 
 static int
@@ -30,8 +30,9 @@ main(int argc, char **argv)
   bool xbose = false;
   program_name = argv[0];
 
+  if (verbose) error(0,0,"d");
   for (;;)
-    switch (getopt(argc, argv, "pt"))
+    switch (getopt(argc, argv, "ptvx"))
       {
       case 'p': print_tree = true; break;
       case 't': time_travel = true; break;
@@ -45,7 +46,6 @@ main(int argc, char **argv)
   // There must be exactly one file argument.
   if (optind != argc - 1)
     usage();
-
   script_name = argv[optind];
   FILE *script_stream = fopen(script_name, "r");
   if (!script_stream)
@@ -61,7 +61,7 @@ main(int argc, char **argv)
     int finalstatus = 0;
     if (graph != NULL)
       {
-        finalstatus = executeGraph(graph);
+        finalstatus = executeGraph(graph, xbose);
         if (finalstatus == 0) error(1, 0, "error");
       }
     else
@@ -79,7 +79,8 @@ main(int argc, char **argv)
 	  else
 	    {
 	      last_command = command;
-	      execute_command(command, time_travel);
+	      if (verbose) print_verbose(command);
+	      execute_command(command, time_travel, xbose);
 	    }
 	}
     }

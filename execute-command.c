@@ -14,12 +14,13 @@
 #include <pthread.h>
 #include <error.h>
 #include <string.h>
+#include <stdio.h>
 
+static bool _xbose;
 /*
  * DEBUG INFO:
  *
 #ifdef _DEBUG
-#include <stdio.h>
 
 void printExam(graphNode* n)
 {
@@ -65,6 +66,15 @@ void printdep(depGraph* g)
 #endif
 */
 
+char* _strcat(char* op1, char* op2)
+{
+  if (!(op1 && op2)) return NULL;
+  char* r = checked_malloc(sizeof(char) * (strlen(op1) + strlen(op2) + 1));
+  strcpy(r, op1);
+  strcat(r, op2);
+  return r;
+}
+
 void exe_cmd(command_t c);
 
 int command_status(command_t c)
@@ -106,6 +116,18 @@ void exe_redi_cmd(command_t c)
 
 void exe_simple_cmd(command_t c)
 {
+  if (_xbose)
+  {
+    char* cmd = "";
+    int i = 0;
+    while (c->u.word[i])
+    {
+      cmd = _strcat(cmd, " ");
+      cmd = _strcat(cmd, c->u.word[i]);
+      i++;
+    }
+    fprintf(stderr, "+ %s\n", cmd);
+  }
   char str[] = "exec";
   if (strcmp(c->u.word[0], str) == 0)
     {
@@ -635,7 +657,7 @@ int executeNoDep(graphNode** c)
        pid_t pid = fork();
       if (pid == 0)
       {
-	  execute_command(c[i]->cmdNode->cmd, 1);
+	  execute_command(c[i]->cmdNode->cmd, 1, _xbose);
 	  exit(c[i]->cmdNode->cmd->status);
       }
       else
@@ -673,7 +695,7 @@ int executeDep(graphNode** c)
       pid_t pid = fork();
       if (pid == 0)
 	{
-	  execute_command(dep->cmdNode->cmd, 1);
+	  execute_command(dep->cmdNode->cmd, 1, _xbose);
 	  exit(c[i]->cmdNode->cmd->status);
 	}
       else
@@ -683,8 +705,9 @@ int executeDep(graphNode** c)
   return 1;
 }
 
-int executeGraph(depGraph* t)
+int executeGraph(depGraph* t, bool xbose)
 {
+  _xbose = xbose;
   int i = executeNoDep(t->ndep);
   int j = executeDep(t->dep);
   int a;
@@ -708,11 +731,9 @@ int executeGraph(depGraph* t)
 }
 
 void
-execute_command(command_t c, bool time_travel)
+execute_command(command_t c, bool time_travel, bool xbose)
 {
-  if (time_travel == 0)
-    exe_cmd(c);
-  if (time_travel == 1)
-    exe_cmd(c);
-
+  UNUSED(time_travel);
+  _xbose = xbose;
+  exe_cmd(c);
 }

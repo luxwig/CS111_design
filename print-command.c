@@ -7,6 +7,49 @@
 #include <stdlib.h>
 
 static void
+command_unindented_print (command_t c)
+{
+  switch (c->type)
+    {
+    case AND_COMMAND:
+    case SEQUENCE_COMMAND:
+    case OR_COMMAND:
+    case PIPE_COMMAND:
+      {
+	command_unindented_print (c->u.command[0]);
+	static char const command_label[][3] = { "&&", ";", "||", "|" };
+	printf (" %s ", command_label[c->type]);
+	command_unindented_print (c->u.command[1]);
+	break;
+      }
+
+    case SIMPLE_COMMAND:
+      {
+	char **w = c->u.word;
+	printf ("%s",*w);
+	while (*++w)
+	  printf (" %s", *w);
+	break;
+      }
+
+    case SUBSHELL_COMMAND:
+      printf ("(");
+      command_unindented_print (c->u.subshell_command);
+      printf (")");
+      break;
+
+    default:
+      abort ();
+    }
+
+  if (c->input)
+    printf (" < %s", c->input);
+  if (c->output)
+    printf (" > %s", c->output);
+}
+
+
+static void
 command_indented_print (int indent, command_t c)
 {
   switch (c->type)
@@ -55,4 +98,11 @@ print_command (command_t c)
 {
   command_indented_print (2, c);
   putchar ('\n');
+}
+
+void
+print_verbose (command_t c)
+{
+  command_unindented_print(c);
+  putchar('\n');
 }
