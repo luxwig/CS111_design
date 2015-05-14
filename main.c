@@ -50,10 +50,10 @@ main(int argc, char **argv)
       }
  options_exhausted:;
   //some options are exclusive
-  if (time_travel == true && verbose == true)
-    usage();
   if (doption == true && (verbose == false && xbose == false))
     usage();
+  if (time_travel == true && (verbose == true || xbose == true || doption == true))
+        time_travel = false;
 
   _pause = doption;
   // There must be exactly one file argument.
@@ -96,12 +96,13 @@ main(int argc, char **argv)
 	      if (verbose) 
 		{
 		  if (!f) f = true;
-		  else putchar('\n');
+		  else fprintf(stderr, "\n");
+		  if (doption) fprintf(stderr, "* ");
 		  print_verbose(command);
 		  if (_pause) _pause = debugMode();
 		}
 	      _pause = execute_command(command, time_travel, xbose, doption, _pause);
-	      if (doption) print_ec(-1, command_status(command));
+	      if (doption) print_ec("",-1, command_status(command));
 	    }
 	}
     }

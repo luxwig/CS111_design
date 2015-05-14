@@ -119,9 +119,9 @@ void exe_redi_cmd(command_t c)
 
 void exe_simple_cmd(command_t c)
 {
+  char* cmd = "";
   if (_xbose)
   {
-    char* cmd = "";
     int i = 0;
     while (c->u.word[i])
     {
@@ -129,7 +129,7 @@ void exe_simple_cmd(command_t c)
       cmd = _strcat(cmd, c->u.word[i]);
       i++;
     }
-    fprintf(stderr, "+%s\n", cmd);
+    fprintf(stderr, "    +%s\n", cmd);
     if (_pause && !_pipe) _pause = debugMode();
   }
   int pid;
@@ -178,9 +178,9 @@ void exe_simple_cmd(command_t c)
     {
       char* t = "";
       t = _strcat("Output redirected to file: ", c->output);
-      print_debugInfo(t);
+      print_debugInfo(t, "\x1b[33m");
     }
-    print_ec(pid, c->status);
+    print_ec(cmd, pid, c->status);
   }
 }
 

@@ -76,7 +76,6 @@ void print_verbose(command_t);
 
 bool debugMode(void);
 
-void print_debugInfo(char*);
-
-void print_ec(int, int);
+void print_debugInfo(char*, char*);
+void print_ec(char* ,pid_t, int);
 
