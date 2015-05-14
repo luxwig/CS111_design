@@ -1,7 +1,3 @@
-ls > 1.txt
+cat tst | echo a
 
-rm 1.txt
-
-ls | wc -l
-
-echo q
+echo a

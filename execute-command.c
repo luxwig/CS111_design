@@ -19,7 +19,7 @@
 static bool _xbose;
 static bool _doption;
 static bool _pause;
-
+static bool _pipe = 0;
 /*
  * DEBUG INFO:
  *
@@ -130,7 +130,7 @@ void exe_simple_cmd(command_t c)
       i++;
     }
     fprintf(stderr, "+%s\n", cmd);
-    if (_pause) _pause = debugMode();
+    if (_pause && !_pipe) _pause = debugMode();
   }
   int pid;
   char str[] = "exec";
@@ -227,6 +227,7 @@ void exe_sequence_cmd(command_t c)
 
 void exe_pipe_cmd(command_t c)
 {
+  _pipe++;
   int fd[2];
   pipe(fd);
   pid_t firstpid = fork();
@@ -280,6 +281,7 @@ void exe_pipe_cmd(command_t c)
 	    error(127, 0, "waitpid error");
 	}
     }
+  _pipe--;
 }
 
 
@@ -672,7 +674,7 @@ int executeNoDep(graphNode** c)
        pid_t pid = fork();
       if (pid == 0)
       {
-	  execute_command(c[i]->cmdNode->cmd, 1, _xbose, _doption);
+	  execute_command(c[i]->cmdNode->cmd, 1, _xbose, _doption, _pause);
 	  exit(c[i]->cmdNode->cmd->status);
       }
       else
@@ -710,7 +712,7 @@ int executeDep(graphNode** c)
       pid_t pid = fork();
       if (pid == 0)
 	{
-	  execute_command(dep->cmdNode->cmd, 1, _xbose, _doption);
+	  execute_command(dep->cmdNode->cmd, 1, _xbose, _doption, _pause);
 	  exit(c[i]->cmdNode->cmd->status);
 	}
       else
@@ -720,9 +722,11 @@ int executeDep(graphNode** c)
   return 1;
 }
 
-int executeGraph(depGraph* t, bool xbose)
+int executeGraph(depGraph* t, bool xbose, bool doption)
 {
   _xbose = xbose;
+  _doption = doption;
+  _pause = doption;
   int i = executeNoDep(t->ndep);
   int j = executeDep(t->dep);
   int a;
@@ -745,11 +749,13 @@ int executeGraph(depGraph* t, bool xbose)
   else return 0;
 }
 
-void
-execute_command(command_t c, bool time_travel, bool xbose, bool doption)
+bool
+execute_command(command_t c, bool time_travel, bool xbose, bool doption, bool pause)
 {
   UNUSED(time_travel);
   _xbose = xbose;
   _doption = doption;
+  _pause = pause;
   exe_cmd(c);
+  return _pause;
 }
