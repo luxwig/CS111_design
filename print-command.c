@@ -104,5 +104,5 @@ void
 print_verbose (command_t c)
 {
   command_unindented_print(c);
-  putchar('\n');
+  putchar ('\n');
 }

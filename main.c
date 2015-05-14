@@ -69,6 +69,7 @@ main(int argc, char **argv)
   }
   else
     {
+      bool f = false;
       while ((command = read_command_stream(command_stream)))
 	{
 	  if (print_tree)
@@ -79,7 +80,11 @@ main(int argc, char **argv)
 	  else
 	    {
 	      last_command = command;
-	      if (verbose) print_verbose(command);
+	      if (verbose) {
+		if (!f) f = true;
+		else putchar('\n'); 
+		print_verbose(command);
+	      }
 	      execute_command(command, time_travel, xbose);
 	    }
 	}

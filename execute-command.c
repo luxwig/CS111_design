@@ -126,7 +126,7 @@ void exe_simple_cmd(command_t c)
       cmd = _strcat(cmd, c->u.word[i]);
       i++;
     }
-    fprintf(stderr, "+ %s\n", cmd);
+    fprintf(stderr, "+%s\n", cmd);
   }
   char str[] = "exec";
   if (strcmp(c->u.word[0], str) == 0)
