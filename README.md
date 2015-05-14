@@ -22,5 +22,5 @@ The program has limited parallel execuataion as it stated in the spec.
 
 ## FEATURES
 
-The program achieved the goal as it stated in spec. No special feature is added.
-
+* -x and -v function is added to output the the command for each step
+* -d is added to show the step by step debug mode and interaction
