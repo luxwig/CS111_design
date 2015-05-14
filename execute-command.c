@@ -18,6 +18,8 @@
 
 static bool _xbose;
 static bool _doption;
+static bool _pause;
+
 /*
  * DEBUG INFO:
  *
@@ -128,7 +130,9 @@ void exe_simple_cmd(command_t c)
       i++;
     }
     fprintf(stderr, "+%s\n", cmd);
+    if (_pause) _pause = debugMode();
   }
+  int pid;
   char str[] = "exec";
   if (strcmp(c->u.word[0], str) == 0)
     {
@@ -138,7 +142,7 @@ void exe_simple_cmd(command_t c)
     }
   else
     {
-      int pid = fork();
+      pid = fork();
 
       //cannot fork
       if (pid < 0)
@@ -168,6 +172,16 @@ void exe_simple_cmd(command_t c)
 	    }
 	}
     }
+  if (_doption)
+  {
+    if (c->output) 
+    {
+      char* t = "";
+      t = _strcat("Output redirected to file: ", c->output);
+      print_debugInfo(t);
+    }
+    print_ec(pid, c->status);
+  }
 }
 
 void exe_and_cmd(command_t c)

@@ -75,3 +75,8 @@ depGraph* createGraph(command_stream_t);
 void print_verbose(command_t);
 
 bool debugMode(void);
+
+void print_debugInfo(char*);
+
+void print_ec(int, int);
+
