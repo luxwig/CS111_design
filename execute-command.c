@@ -172,7 +172,7 @@ void exe_simple_cmd(command_t c)
 	    }
 	}
     }
-  if (_doption)
+  if (_doption && _xbose)
   {
     if (c->output) 
     {
