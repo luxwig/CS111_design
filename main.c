@@ -20,21 +20,10 @@ get_next_byte(void *stream)
   return getc(stream);
 }
 
-void verbose_helper(command_t command, bool* d)
-{
-  bool f = false;
-  if (!f) f = true;
-  else putchar('\n');
-  print_verbose(command);
-  if (*d)
-    {
-      *d = debugMode();
-      execute_command(command,false);
-    }
-  else
-    execute_command(command,false);
-}
-
+/*
+void verbose_helper(command_t command)
+{  
+*/
 int
 main(int argc, char **argv)
 {
@@ -44,6 +33,7 @@ main(int argc, char **argv)
   bool verbose = false;
   bool xbose = false;
   bool doption = false;
+  bool _pause = false;
   if (doption) doption = false;
   program_name = argv[0];
 
@@ -64,14 +54,15 @@ main(int argc, char **argv)
     usage();
   if (time_travel == true && (verbose == true || xbose == true || doption == true))
     time_travel = false;
-  
+
+  _pause = doption;
   // There must be exactly one file argument.
   if (optind != argc - 1)
     usage();
   script_name = argv[optind];
   FILE *script_stream = fopen(script_name, "r");
   if (!script_stream)
-    error(0, errno, "%s: cannot open", script_name);
+    error(1, errno, "%s: cannot open", script_name);
   command_stream_t command_stream =
     make_command_stream(get_next_byte, script_stream);
 
@@ -83,7 +74,7 @@ main(int argc, char **argv)
     int finalstatus = 0;
     if (graph != NULL)
       {
-        finalstatus = executeGraph(graph, xbose);
+        finalstatus = executeGraph(graph, xbose, doption);
         if (finalstatus == 0) error(1, 0, "error");
       }
     else
@@ -91,6 +82,7 @@ main(int argc, char **argv)
   }
   else
     {
+      bool f = false;
       while ((command = read_command_stream(command_stream)))
 	{
 	  if (print_tree)
@@ -103,9 +95,14 @@ main(int argc, char **argv)
 	      last_command = command;
 	      if (verbose) 
 		{
-		  verbose_helper(command,&doption);
+		  if (!f) f = true;
+		  else fprintf(stderr, "\n");
+		  if (doption) fprintf(stderr, "* ");
+		  print_verbose(command);
+		  if (_pause) _pause = debugMode();
 		}
-	      execute_command(command, time_travel, xbose, doption);
+	      _pause = execute_command(command, time_travel, xbose, doption, _pause);
+	      if (doption) print_ec("",-1, command_status(command));
 	    }
 	}
     }

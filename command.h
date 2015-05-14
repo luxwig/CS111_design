@@ -11,9 +11,9 @@ typedef struct command_stream *command_stream_t;
 
 typedef struct
 {
-  	command_t cmd;
-	struct rlist* readlist;
-	struct wlist* writelist;
+  command_t cmd;
+  struct rlist* readlist;
+  struct wlist* writelist;
 }rwnode;
 
 
@@ -21,30 +21,30 @@ typedef struct rwnode* rwnode_t;
 
 struct graphNN
 {
-	rwnode* cmdNode;
-	struct graphNN** before;
-	pid_t pid;   //initialize to -1
+  rwnode* cmdNode;
+  struct graphNN** before;
+  pid_t pid;   //initialize to -1
 };
 typedef struct graphNN graphNode;
 
 typedef struct graphNode* graphNode_t;
 typedef struct
 {
-	graphNode** ndep;
-	graphNode** dep;
+  graphNode** ndep;
+  graphNode** dep;
 }depGraph;
 
 struct rlist
 {
-	char* content;
-	struct rlist* next;
+  char* content;
+  struct rlist* next;
 };
 
 struct wlist
 
 {
-	char* content;
-	struct wlist* next;
+  char* content;
+  struct wlist* next;
 };
 
 
@@ -55,20 +55,20 @@ GETBYTE will return the next input byte, or a negative number
 command_stream_t make_command_stream(int(*getbyte) (void *), void *arg);
 
 /* Read a command from STREAM; return it, or NULL on EOF.  If there is
-an error, report the error and exit instead of returning.  */
+   an error, report the error and exit instead of returning.  */
 command_t read_command_stream(command_stream_t stream);
 
 /* Print a command to stdout, for debugging.  */
 void print_command(command_t);
 
 /* Execute a command.  Use "time travel" if the flag is set.  */
-void execute_command(command_t, bool, bool, bool);
+bool execute_command(command_t, bool, bool, bool, bool);
 
 /* Return the exit status of a command, which must have previously
-been executed.  Wait for the command, if it is not already finished.  */
+   been executed.  Wait for the command, if it is not already finished.  */
 int command_status(command_t);
 
-int executeGraph(depGraph*, bool);
+int executeGraph(depGraph*, bool, bool);
 
 depGraph* createGraph(command_stream_t);
 
@@ -76,7 +76,5 @@ void print_verbose(command_t);
 
 bool debugMode(void);
 
-void print_debugInfo(char*);
-
-void print_ec(int, int);
-
+void print_debugInfo(char*, char*);
+void print_ec(char* ,pid_t, int);

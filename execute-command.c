@@ -19,24 +19,22 @@
 static bool _xbose;
 static bool _doption;
 static bool _pause;
-
+static bool _pipe = 0;
 /*
  * DEBUG INFO:
  *
 #ifdef _DEBUG
-
 void printExam(graphNode* n)
 {
   if (!n) return;
   printf("Address %p\n", n);
   if (n->cmdNode->cmd->type != SIMPLE_COMMAND) 
     printf("cmd type: %d\n",n->cmdNode->cmd->type);
-  else 
+    else 
     printf("cmd %s, input %s, output %s\n", n->cmdNode->cmd->u.word[0],
- 					n->cmdNode->cmd->input,
-					n->cmdNode->cmd->output);
+    n->cmdNode->cmd->input,
+    n->cmdNode->cmd->output);
   graphNode ** head =  n->before;
-
   printf("Depend on :");
   while (head && *head)
   {
@@ -45,25 +43,24 @@ void printExam(graphNode* n)
   }
   printf("\n\n");
 }
-
 void printdep(depGraph* g)
 {
   if (!g) return;
   graphNode ** head = g->dep;
   printf("Dependent command:\n");
   while (head && *head)
-  {
-    printf("%p\t", *head);
-    head++;
-  }
+    {
+      printf("%p\t", *head);
+      head++;
+    }
   printf("\n");
   head = g->ndep;
   printf("Independent command:\n");
   while (head && *head)
-  {
-    printf("%p\t", *head);
-    head++;
-  }
+    {
+      printf("%p\t", *head);
+      head++;
+    }
   printf("\n");
 }
 #endif
@@ -119,19 +116,19 @@ void exe_redi_cmd(command_t c)
 
 void exe_simple_cmd(command_t c)
 {
+  char* cmd = "";
   if (_xbose)
-  {
-    char* cmd = "";
-    int i = 0;
-    while (c->u.word[i])
     {
-      cmd = _strcat(cmd, " ");
-      cmd = _strcat(cmd, c->u.word[i]);
-      i++;
+      int i = 0;
+      while (c->u.word[i])
+	{
+	  cmd = _strcat(cmd, " ");
+	  cmd = _strcat(cmd, c->u.word[i]);
+	  i++;
+	}
+      fprintf(stderr, "     +%s\n", cmd);
+      if (_pause && !_pipe) _pause = debugMode();
     }
-    fprintf(stderr, "+%s\n", cmd);
-    if (_pause) _pause = debugMode();
-  }
   int pid;
   char str[] = "exec";
   if (strcmp(c->u.word[0], str) == 0)
@@ -172,16 +169,16 @@ void exe_simple_cmd(command_t c)
 	    }
 	}
     }
-  if (_doption)
-  {
-    if (c->output) 
+  if (_doption && _xbose)
     {
-      char* t = "";
-      t = _strcat("Output redirected to file: ", c->output);
-      print_debugInfo(t);
+      if (c->output) 
+	{
+	  char* t = "";
+	  t = _strcat("Output redirected to file: ", c->output);
+	  print_debugInfo(t, "\x1b[33m");
+	}
+      print_ec(cmd, pid, c->status);
     }
-    print_ec(pid, c->status);
-  }
 }
 
 void exe_and_cmd(command_t c)
@@ -227,6 +224,7 @@ void exe_sequence_cmd(command_t c)
 
 void exe_pipe_cmd(command_t c)
 {
+  _pipe++;
   int fd[2];
   pipe(fd);
   pid_t firstpid = fork();
@@ -280,6 +278,7 @@ void exe_pipe_cmd(command_t c)
 	    error(127, 0, "waitpid error");
 	}
     }
+  _pipe--;
 }
 
 
@@ -565,10 +564,10 @@ size_t getSize(graphNode **list)
   if (!list) return 0;
   size_t s = 0;
   while(*list)
-  {
-    list++;
-    s++;
-  }
+    {
+      list++;
+      s++;
+    }
   return s + 1;
 }
 
@@ -576,15 +575,15 @@ graphNode** add(graphNode* list[], graphNode* item)
 {
   size_t size = getSize(list);
   if (size == 0)
-  {
-    size = 2;
-    list = checked_malloc(sizeof(graphNode*) * 2);
-  }
+    {
+      size = 2;
+      list = checked_malloc(sizeof(graphNode*) * 2);
+    }
   else
-  {
-    size += 1;
-    list = checked_realloc(list, sizeof(graphNode*) * size);
-  }
+    {
+      size += 1;
+      list = checked_realloc(list, sizeof(graphNode*) * size);
+    }
   list[size - 1] = NULL;
   list[size - 2] = item; 
   return list;
@@ -599,69 +598,69 @@ graphNode* createGraphNode(rwnode* node, graphNode** nodeList, int count)
   graphNode** head = nodeList;
   int i = 0;
   for (i = 0; i < count; i++)
-  {
-    if (!check_dependency(node, (*head)->cmdNode))
     {
-      ret->before = add(ret->before, *head);
+      if (!check_dependency(node, (*head)->cmdNode))
+	{
+	  ret->before = add(ret->before, *head);
+	}
+      head++;
     }
-    head++;
-  }
   return ret;
 }
 
 depGraph* createGraph(command_stream_t s)
 {
-  	size_t count = 0,
-	       ndep_c = 0,
-	       dep_c = 0;
-	command_t c;
-	depGraph* ret = checked_malloc(sizeof(depGraph*));
-	ret->ndep = checked_malloc(sizeof(graphNode*));
-	ret->dep = checked_malloc(sizeof(graphNode*));
-	ret->ndep[0] = NULL;
-	ret->dep[0] = NULL;
-	graphNode** gNode = checked_malloc(sizeof(graphNode*));
-	while ((c = read_command_stream(s)))
+  size_t count = 0,
+    ndep_c = 0,
+    dep_c = 0;
+  command_t c;
+  depGraph* ret = checked_malloc(sizeof(depGraph*));
+  ret->ndep = checked_malloc(sizeof(graphNode*));
+  ret->dep = checked_malloc(sizeof(graphNode*));
+  ret->ndep[0] = NULL;
+  ret->dep[0] = NULL;
+  graphNode** gNode = checked_malloc(sizeof(graphNode*));
+  while ((c = read_command_stream(s)))
+    {
+      gNode = checked_realloc(gNode, sizeof(graphNode*) * (count+2));
+      rwnode* t = create_rwnode(c);
+      gNode[count] = createGraphNode(t,gNode,count);
+      if (gNode[count]->before)
 	{
-	  	gNode = checked_realloc(gNode, sizeof(graphNode*) * (count+2));
-		rwnode* t = create_rwnode(c);
-		gNode[count] = createGraphNode(t,gNode,count);
-		if (gNode[count]->before)
-		{
-		  ret->dep = checked_realloc(ret->dep, sizeof(graphNode*) * (dep_c+2));
-		  ret->dep[dep_c] = gNode[count];
-		  dep_c++;
-		  ret->dep[dep_c] = NULL;
-		}
-		else
-		{
-		  ret->ndep = checked_realloc(ret->ndep, sizeof(graphNode*) * (ndep_c+2));
-		  ret->ndep[ndep_c] = gNode[count];
-		  ndep_c++;
-		  ret->ndep[ndep_c] = NULL;
-		}
-		gNode[count + 1] = NULL;
-
-/*
- * DEBUG INFO:
- *
-#ifdef _DEBUG
-		printExam(gNode[count]);
-#endif
-*/
-
-		count++;
+	  ret->dep = checked_realloc(ret->dep, sizeof(graphNode*) * (dep_c+2));
+	  ret->dep[dep_c] = gNode[count];
+	  dep_c++;
+	  ret->dep[dep_c] = NULL;
 	}
+      else
+	{
+	  ret->ndep = checked_realloc(ret->ndep, sizeof(graphNode*) * (ndep_c+2));
+	  ret->ndep[ndep_c] = gNode[count];
+	  ndep_c++;
+	  ret->ndep[ndep_c] = NULL;
+	}
+      gNode[count + 1] = NULL;
 
-/*
- * DEBUG INFO
- *
+      /*
+       * DEBUG INFO:
+       *
 #ifdef _DEBUG
-	printdep(ret);
+printExam(gNode[count]);
 #endif
-*/
+      */
 
-        return ret;
+      count++;
+    }
+
+  /*
+   * DEBUG INFO
+   *
+#ifdef _DEBUG
+printdep(ret);
+#endif
+  */
+
+  return ret;
 }
 
 int executeNoDep(graphNode** c)
@@ -669,16 +668,16 @@ int executeNoDep(graphNode** c)
   int i = 0;
   while (c[i] != NULL)
     {
-       pid_t pid = fork();
+      pid_t pid = fork();
       if (pid == 0)
-      {
-	  execute_command(c[i]->cmdNode->cmd, 1, _xbose, _doption);
+	{
+	  execute_command(c[i]->cmdNode->cmd, 1, _xbose, _doption, _pause);
 	  exit(c[i]->cmdNode->cmd->status);
-      }
+	}
       else
-      {
+	{
 	  c[i]->pid = pid;
-      }
+	}
       i++;
     }
   return 1;
@@ -692,7 +691,7 @@ int executeDep(graphNode** c)
       int j = 0;
       graphNode* dep = c[i];
       graphNode* prev;
-     loop_label:
+    loop_label:
       while ((prev = dep->before[j])!= NULL)
 	{
 	  if (prev->pid == -1)
@@ -710,7 +709,7 @@ int executeDep(graphNode** c)
       pid_t pid = fork();
       if (pid == 0)
 	{
-	  execute_command(dep->cmdNode->cmd, 1, _xbose, _doption);
+	  execute_command(dep->cmdNode->cmd, 1, _xbose, _doption, _pause);
 	  exit(c[i]->cmdNode->cmd->status);
 	}
       else
@@ -720,9 +719,11 @@ int executeDep(graphNode** c)
   return 1;
 }
 
-int executeGraph(depGraph* t, bool xbose)
+int executeGraph(depGraph* t, bool xbose, bool doption)
 {
   _xbose = xbose;
+  _doption = doption;
+  _pause = doption;
   int i = executeNoDep(t->ndep);
   int j = executeDep(t->dep);
   int a;
@@ -745,11 +746,13 @@ int executeGraph(depGraph* t, bool xbose)
   else return 0;
 }
 
-void
-execute_command(command_t c, bool time_travel, bool xbose, bool doption)
+bool
+execute_command(command_t c, bool time_travel, bool xbose, bool doption, bool pause)
 {
   UNUSED(time_travel);
   _xbose = xbose;
   _doption = doption;
+  _pause = pause;
   exe_cmd(c);
+  return _pause;
 }
