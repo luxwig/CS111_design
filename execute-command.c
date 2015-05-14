@@ -734,6 +734,7 @@ void
 execute_command(command_t c, bool time_travel, bool xbose)
 {
   UNUSED(time_travel);
+  UNUSED(xbose);
   _xbose = xbose;
   exe_cmd(c);
 }

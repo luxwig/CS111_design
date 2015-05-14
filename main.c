@@ -11,7 +11,7 @@ static char const *script_name;
 static void
 usage(void)
 {
-  error(1, 0, "usage: %s [-ptvx] SCRIPT-FILE", program_name);
+  error(1, 0, "usage: %s [-dptvx] SCRIPT-FILE", program_name);
 }
 
 static int
@@ -28,16 +28,18 @@ main(int argc, char **argv)
   bool time_travel = false;
   bool verbose = false;
   bool xbose = false;
+  bool doption = false;
+  if (doption) doption = false;
   program_name = argv[0];
 
-  if (verbose) error(0,0,"d");
   for (;;)
-    switch (getopt(argc, argv, "ptvx"))
+    switch (getopt(argc, argv, "dptvx"))
       {
       case 'p': print_tree = true; break;
       case 't': time_travel = true; break;
       case 'v': verbose = true; break;
       case 'x': xbose = true; break;
+      case 'd': doption = true; break;
       default: usage(); break;
       case -1: goto options_exhausted;
       }

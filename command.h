@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 
+
 typedef struct command *command_t;
 typedef struct command_stream *command_stream_t;
 
@@ -73,4 +74,4 @@ depGraph* createGraph(command_stream_t);
 
 void print_verbose(command_t);
 
-
+bool debugMode(void);
