@@ -1,4 +1,22 @@
 #include <stdio.h>
+#include <string.h>
+
+void print_debugInfo(char* msg)
+{
+  char before[500], after[20];
+  strcpy(after, " ]");
+  strcpy(before, "[Debug Info: ");
+  strcat(before, msg);
+  strcat(before,after);
+  fprintf(stderr,"%s\n", before);
+}
+
+void print_ec(pid_t pid, int status)
+{
+  fprintf(stderr, "[Debug Info: Process %d exited with status %d ]\n",pid,statu\
+	  s);
+}
+
 
 bool debugMode(void)
 {

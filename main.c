@@ -60,12 +60,11 @@ main(int argc, char **argv)
       }
  options_exhausted:;
   //some options are exclusive
-  if (time_travel == true && verbose == true)
-    usage();
   if (doption == true && (verbose == false && xbose == false))
     usage();
-
-
+  if (time_travel == true && (verbose == true || xbose == true || doption == true))
+    time_travel = false;
+  
   // There must be exactly one file argument.
   if (optind != argc - 1)
     usage();
