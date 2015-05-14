@@ -17,6 +17,7 @@
 #include <stdio.h>
 
 static bool _xbose;
+static bool _doption;
 /*
  * DEBUG INFO:
  *
@@ -731,7 +732,7 @@ int executeGraph(depGraph* t, bool xbose)
 }
 
 void
-execute_command(command_t c, bool time_travel, bool xbose)
+execute_command(command_t c, bool time_travel, bool xbose, bool doption)
 {
   UNUSED(time_travel);
   UNUSED(xbose);
