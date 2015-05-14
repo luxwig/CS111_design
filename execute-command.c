@@ -658,7 +658,7 @@ int executeNoDep(graphNode** c)
        pid_t pid = fork();
       if (pid == 0)
       {
-	  execute_command(c[i]->cmdNode->cmd, 1, _xbose);
+	  execute_command(c[i]->cmdNode->cmd, 1, _xbose, _doption);
 	  exit(c[i]->cmdNode->cmd->status);
       }
       else
@@ -696,7 +696,7 @@ int executeDep(graphNode** c)
       pid_t pid = fork();
       if (pid == 0)
 	{
-	  execute_command(dep->cmdNode->cmd, 1, _xbose);
+	  execute_command(dep->cmdNode->cmd, 1, _xbose, _doption);
 	  exit(c[i]->cmdNode->cmd->status);
 	}
       else
@@ -735,7 +735,7 @@ void
 execute_command(command_t c, bool time_travel, bool xbose, bool doption)
 {
   UNUSED(time_travel);
-  UNUSED(xbose);
   _xbose = xbose;
+  _doption = doption;
   exe_cmd(c);
 }

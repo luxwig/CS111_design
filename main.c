@@ -87,7 +87,7 @@ main(int argc, char **argv)
 		else putchar('\n'); 
 		print_verbose(command);
 	      }
-	      execute_command(command, time_travel, xbose);
+	      execute_command(command, time_travel, xbose, doption);
 	    }
 	}
     }
